@@ -1,52 +1,23 @@
-const express = require("express");
-const cors = require("cors");
-const pool = require("./config/db");
-
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
-// Database Connection
-pool.connect()
-  .then(() => console.log("✅ PostgreSQL Connected"))
-  .catch((err) => console.error("❌ Database Error:", err));
-
-// Home Route
-app.get("/", async (req, res) => {
-  try {
-    const result = await pool.query("SELECT NOW()");
-
-    res.json({
-      message: "BioTrack AI Server is Running",
-      time: result.rows[0],
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Database Error");
-  }
-});
+const pool = require("../config/db");
 
 // Get All Devices
-app.get("/devices", async (req, res) => {
+const getDevices = async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT * FROM devices ORDER BY id ASC"
     );
 
     res.json(result.rows);
-
   } catch (err) {
     console.error(err);
     res.status(500).json({
       error: err.message,
     });
   }
-});
+};
 
 // Add Device
-app.post("/devices", async (req, res) => {
+const addDevice = async (req, res) => {
   try {
     const {
       asset_number,
@@ -82,8 +53,9 @@ app.post("/devices", async (req, res) => {
       error: err.message,
     });
   }
-});
+};
 
-app.listen(3000, () => {
-  console.log("🚀 Server running on http://localhost:3000");
-});
+module.exports = {
+  getDevices,
+  addDevice,
+};
